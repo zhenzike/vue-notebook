@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>品牌列表案例</title>
+  <link rel="stylesheet" href="./lib/bootstrap.css">
+  <link rel="stylesheet" href="./css/brandlist.css">
+</head>
+
+<body>
+
+  <div id="app">
+    <!-- 卡片区域 -->
+    <div class="card">
+      <div class="card-header">
+        添加品牌
+      </div>
+      <div class="card-body">
+        <!-- 添加品牌的表单区域 -->
+        <!-- form 表单元素有 submit 事件 ,使用@submit.prevent阻止网页刷新，但是事件仍旧会触发-->
+        <form @submit.prevent="add">
+          <div class="form-row align-items-center">
+            <div class="col-auto">
+              <div class="input-group mb-2">
+                <div class="input-group-prepend">
+                  <div class="input-group-text">品牌名称</div>
+                </div>
+                <input type="text" class="form-control" placeholder="请输入品牌名称" v-model.trim="brand">
+              </div>
+            </div>
+            <div class="col-auto">
+              <button type="submit" class="btn btn-primary mb-2">添加</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- 表格区域 -->
+    <table class="table table-bordered table-hover table-striped">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">品牌名称</th>
+          <th scope="col">状态</th>
+          <th scope="col">创建时间</th>
+          <th scope="col">操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="item in list" :key="item.id">
+          <td>{{ item.id }}</td>
+          <td>{{ item.name }}</td>
+          <td>
+            <div class="custom-control custom-switch">
+              <!-- 使用 v-model 实现双向数据绑定 -->
+              <!-- 通过js拼接的方式使得循环过后复选框有对应的id -->
+              <input type="checkbox" class="custom-control-input" :id="'cb' + item.id" v-model="item.status">
+              <!-- 使用 v-if 结合 v-else 实现按需渲染 -->
+              <!-- 绑定使用:for绑定复选框的id，使得点击内容也可以选中复选框 -->
+              <label class="custom-control-label" :for="'cb' + item.id" v-if="item.status">已启用</label>
+              <label class="custom-control-label" :for="'cb' + item.id" v-else>已禁用</label>
+            </div>
+          </td>
+          <td>{{ item.time | dateFormat }}</td>
+          <td>
+            <a href="javascript:;" @click="remove(item.id)">删除</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 只要导入了 dayjs 的库文件，在 window 全局，就可以使用 dayjs() 方法了 -->
+  <!-- day.js是一个极简的JavaScript库，可以为现代浏览器解析、验证、操作和显示日期和时间。 -->
+  <script src="./lib/dayjs.min.js"></script>
+  <script src="./lib/vue-2.6.12.js"></script>
+  <script>
+    Vue.filter('dateFormat', (time) => {
+      // 直接调用dayjs()得到的是当前时间
+      // dayjs(给定的日期时间)得到指定的日期
+      return dayjs(time).format('YYYY-MM-DD HH:mm:ss');
+    })
+    const vm = new Vue({
+      el: '#app',
+      data: {
+        //用户输入的品牌名称
+        brand: '',
+
+        //使用nextId来表示添加的下一项id
+        nextId: 4,
+
+        //品牌的列表数据
+        list: [
+          { id: 1, name: '宝马', status: true, time: new Date() },
+          { id: 2, name: '奔驰', status: false, time: new Date() },
+          { id: 3, name: '奥迪', status: true, time: new Date() }
+        ]
+      },
+      methods: {
+        remove(id) {
+          // filter() 方法创建给定数组一部分的浅拷贝，其包含通过所提供函数实现的测试的所有元素
+          // callbackFn 返回 true 表示该元素通过测试，保留该元素，false 则不保留
+          //箭头函数不加括号则自动补上return，加上中括号需要自己加上
+          this.list = this.list.filter(item => { return item.id != id })
+          //  可以写为item => item.id != id
+        },
+
+        add() {
+          if (this.brand === '') {
+            return alert('必须填写品牌名称')
+          }
+
+          const obj = {
+            id: this.nextId,
+            name: this.brand,
+            status: true,
+            time: new Date()
+          }
+
+          this.list.push(obj);
+          this.brand = '';
+          this.nextId++;
+        }
+      }
+    })
+  </script>
+</body>
+
+</html>
