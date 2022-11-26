@@ -3663,3 +3663,19 @@ import './element-ui'
 //如果type=index就会自动渲染成索引列
 ```
 
+
+
+# 遇到的一些问题和解决方式
+
+## 为对象追加属性，视图层无法更新数据
+
+原因：
+
+由于受JavaScript的限制，vue.js不能监听对象属性的添加和删除，因为在vue组件初始化的过程中，会调用getter和setter方法，所以该属性必须是存在在data中，视图层才会响应该数据的变化
+
+
+
+解决方式：
+
+1. 使用this.$set(obj, key, value) / vue.set(obj, key, value)
+2. Object.assign(target, sources)方法
