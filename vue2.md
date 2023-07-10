@@ -788,6 +788,32 @@ v-text 指令和插值表达式只能渲染纯文本内容。如果<span style="
 //因此如果加上:对属性进行绑定，如:id="10",因为是js表达式，所以这里不是在 字符串10 ，而是数字9，若还想赋字符串10的话，需要写为:id="'10'"
 ```
 
+### 2.2 绑定class
+
+```js
+//数组形式
+<div :class="[class1,class2]"></div>
+
+//对象形式
+active1=true;active2=false
+<div :class="{class:active1,class2:active2}"></div>
+
+//数组结合对象形式
+active1=true;active2=false
+<div :class="[class3,{class:active1,class2:active2}]"></div>
+
+//使用计算属性
+<div :class="计算属性"></div>
+```
+
+### 2.3 绑定style
+
+```js
+//对象形式
+active1='red';active2=20
+<div :style="{color:active1,fontSize:active2+'px'}"></div>
+```
+
 
 
 ## 3. 事件绑定指令 v-on: | @
@@ -1104,7 +1130,15 @@ v-for指令还支持一个可选的第二个参数，即当前项的索引。语
   </div>
 ```
 
+### 6.4 响应数组修改的方法
 
+- `push()`
+- `pop()`
+- `shift()`
+- `unshift()`
+- `splice()`
+- `sort()`
+- `reverse()`
 
 ## 7. 过滤器(filters)[vue3不能使用]
 
