@@ -15,7 +15,7 @@ async tiffToPngFile(url, filename) {
         canvas.toBlob((blob) => {
             const file = new File([blob], filename, { type: "image/png" });
             resolve(file);
-        }, "image/png");
+        }, "image/png"，0.3);  //0.3表示压缩率，越小图片体积越小，图片质量越低
     });
 },
 ```
