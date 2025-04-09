@@ -422,17 +422,76 @@ export default {
 
 ## 2. 生命周期
 
-### 2.1主要的生命周期函数
+### 1. **创建阶段（Creation）**
 
-<img src="tu/v3主生命周期.png">
+#### (1) `setup`
 
-在实际开发中，**created**是最常用的生命周期函数!
+- **触发时机**：在组件实例创建之前执行，是 Composition API 的入口。
+- **作用**：用于定义响应式数据、计算属性、方法等。
+- **注意**：`setup` 中没有 `this`，因为此时组件实例还未创建。
 
-### 2.2 完整的生命周期函数
+#### (2) `onBeforeMount`
 
-<img src="tu/v3全生命周期.png">
+- **触发时机**：在组件挂载到 DOM 之前执行。
+- **作用**：可以在此时执行一些初始化操作，但此时 DOM 还未渲染。
 
+#### (3) `onMounted`
 
+- **触发时机**：在组件挂载到 DOM 之后执行。
+- **作用**：可以访问 DOM 元素，执行依赖 DOM 的操作（如初始化 Three.js 场景）。
+
+------
+
+### 2. **更新阶段（Update）**
+
+#### (1) `onBeforeUpdate`
+
+- **触发时机**：在组件更新之前执行（数据变化但 DOM 还未重新渲染）。
+- **作用**：可以在 DOM 更新前执行一些操作。
+
+#### (2) `onUpdated`
+
+- **触发时机**：在组件更新之后执行（数据变化且 DOM 已经重新渲染）。
+- **作用**：可以访问更新后的 DOM，执行依赖新 DOM 的操作。
+
+------
+
+### 3. **卸载阶段（Destruction）**
+
+#### (1) `onBeforeUnmount`
+
+- **触发时机**：在组件卸载之前执行。
+- **作用**：可以执行一些清理操作（如解绑事件、取消定时器、释放资源等）。
+
+#### (2) `onUnmounted`
+
+- **触发时机**：在组件卸载之后执行。
+- **作用**：可以执行最终的清理操作（如释放内存、销毁 Three.js 场景等）。
+
+------
+
+### 4. **其他生命周期函数**
+
+#### (1) `onErrorCaptured`
+
+- **触发时机**：在捕获到子组件错误时执行。
+- **作用**：可以处理子组件的错误，防止错误冒泡到全局。
+
+#### (2) `onRenderTracked`
+
+- **触发时机**：在渲染过程中追踪到响应式依赖时执行（仅开发环境）。
+- **作用**：用于调试响应式依赖。
+
+#### (3) `onRenderTriggered`
+
+- **触发时机**：在响应式依赖触发重新渲染时执行（仅开发环境）。
+- **作用**：用于调试重新渲染的原因。
+
+------
+
+### 5. **Vue 3 生命周期图示**
+
+以下是 Vue 3 生命周期的执行顺序：
 
 
 
@@ -459,62 +518,71 @@ export default {
 1、**在根组件和父组件中**：
 
 ```html
-根组件:
-<template>
-  <h1>根组件</h1>
-  <father></father>
-</template>
+--根组件:
+<script setup>
+import left from './components/left.vue';
+import right from './components/right.vue';
+import { ref, provide } from 'vue';
 
-<script>
-import father from './components/father.vue'
-export default {
-  data() {
-    return {
-      color: 'red'
-    }
-  },
-  components: {
-    father
-  },
-  provide() {
-    // 返回要共享的数据对象
-    return {
-      color:this.color
-    }
-  }
-}
-</script>
+// 创建一个响应式对象
+const sharedState = ref({
+  message: 'Hello from Ancestor!'
+});
+ 
+// 使用 provide 函数来提供这个响应式对象
+provide('sharedState', sharedState.value);
 -----------------------------------------------------------------
-父组件：
-<template>
-    <h2>父组件</h2>
-    <son></son>
-</template>
 
-<script>
-import son from './son.vue'
-export default {
-    components: {
-        son
-    }
-}
-</script>
 ```
 
 2、**在子孙组件中：**
 
 ```html
-<template>
-    <h3>son组件 --{{color}}</h3>
-</template>
+子组件A：
+<script setup>
+import { useStore } from '../store/user';
+import { ref,onMounted  } from "vue";
 
-<script>
-export default {
-    //随接收，谁使用inject，接收后可以直接使用
-    inject: ['color']
-}
+import { inject } from 'vue';
+ 
+// 使用 inject 函数来注入 sharedState
+const sharedState = inject('sharedState');
+let userData=useStore();
+
+onMounted(()=>{
+   
+    userData.setusename("sss");
+  
+})
 </script>
 
+<template>
+  <span class="left">{{ userData.usename }}</span>
+   <span class="left2">{{ sharedState.message }}</span>
+</template>
+
+---
+子组件B：
+<script setup>
+
+import { ref,onMounted  } from "vue";
+
+import { inject } from 'vue';
+ 
+// 使用 inject 函数来注入 sharedState
+const sharedState = inject('sharedState');
+
+const change=()=>{
+  sharedState.message="ss"
+  console.log("88");
+}
+
+</script>
+
+<template>
+  <span class="right">{{ sharedState.message }}</span>
+  <button @click="change">改变</button>
+</template>
 ```
 
 
@@ -762,7 +830,7 @@ data() {
 
 
 
-#### 7.2.1 为指定插槽提供内容  v-slot | # #
+#### 7.2.1 为指定插槽提供内容  v-slot | #
 
 使用再次使用< template>< /template>包裹想要插入的内容，并使用**< template v-slot="插槽名称">**来为具名插槽指定内容
 
